@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>JM AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        
+        body {
+            background: #0a0a0f;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+        
+        /* Mobile Optimized Container */
+        .chat-container {
+            width: 100%;
+            height: 100vh;
+            background: rgba(15, 15, 25, 0.98);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        /* Header - Optimized for Mobile */
+        .chat-header {
+            padding: 15px 20px;
+            background: rgba(20, 20, 35, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #0077ff, #ff0080);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .header-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #0077ff, #ff0080);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .header-text .tagline {
+            font-size: 0.8rem;
+            color: #888;
+            margin-top: 2px;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: rgba(0, 180, 100, 0.1);
+            border: 1px solid rgba(0, 255, 150, 0.2);
+            border-radius: 15px;
+            font-size: 0.8rem;
+            color: #00ffaa;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #00ffaa;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #00ffaa;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Messages Area - Optimized for Mobile */
+        .messages-area {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: linear-gradient(180deg, 
+                rgba(10, 10, 20, 0.8) 0%,
+                rgba(15, 15, 25, 0.9) 100%);
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .messages-area::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        .messages-area::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .messages-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 119, 255, 0.5);
+            border-radius: 2px;
+        }
+        
+        /* Message Styling - Mobile Optimized */
+        .message {
+            max-width: 90%;
+            padding: 16px;
+            border-radius: 16px;
+            position: relative;
+            animation: slideIn 0.3s ease;
+            backdrop-filter: blur(10px);
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            line-height: 1.5;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .user-message {
+            align-self: flex-end;
+            background: linear-gradient(135deg, 
+                rgba(0, 100, 255, 0.25) 0%, 
+                rgba(0, 200, 255, 0.15) 100%);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-bottom-right-radius: 6px;
+        }
+        
+        .bot-message {
+            align-self: flex-start;
+            background: linear-gradient(135deg, 
+                rgba(50, 0, 100, 0.2) 0%, 
+                rgba(100, 0, 200, 0.15) 100%);
+            border: 1px solid rgba(150, 0, 255, 0.3);
+            border-bottom-left-radius: 6px;
+        }
+        
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+        
+        .message-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8rem;
+        }
+        
+        .user-avatar {
+            background: linear-gradient(135deg, #0077ff, #00a2ff);
+        }
+        
+        .bot-avatar {
+            background: linear-gradient(135deg, #ff0080, #ff3399);
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        .message-time {
+            margin-left: auto;
+            font-size: 0.75rem;
+            color: #888;
+        }
+        
+        .message-content {
+            font-size: 0.95rem;
+            color: #f0f0f0;
+        }
+        
+        .message-content pre {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 8px 0;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            border-left: 2px solid #0077ff;
+        }
+        
+        .message-content code {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
+            color: #00ffaa;
+        }
+        
+        /* Copy Button - Mobile Friendly */
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #aaa;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.8rem;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(0, 119, 255, 0.3);
+            color: #0077ff;
+            border-color: #0077ff;
+        }
+        
+        .copy-btn.copied {
+            background: rgba(0, 255, 100, 0.3);
+            color: #00ffaa;
+            border-color: #00ffaa;
+        }
+        
+        /* Uploaded Image - Mobile Optimized */
+        .uploaded-image {
+            max-width: 100%;
+            max-height: 150px;
+            border-radius: 8px;
+            margin: 8px 0;
+            border: 1px solid rgba(0, 119, 255, 0.3);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        
+        /* Input Area - Mobile Optimized */
+        .input-area {
+            padding: 20px;
+            background: rgba(20, 20, 35, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+        
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        
+        .input-box {
+            flex: 1;
+            position: relative;
+        }
+        
+        .input-box textarea {
+            width: 100%;
+            padding: 16px 60px 16px 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+            min-height: 50px;
+            max-height: 120px;
+            line-height: 1.4;
+            transition: all 0.3s;
+            -webkit-appearance: none;
+        }
+        
+        .input-box textarea:focus {
+            border-color: #0077ff;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 20px rgba(0, 119, 255, 0.2);
+        }
+        
+        .input-box textarea::placeholder {
+            color: #666;
+        }
+        
+        .input-icons {
+            position: absolute;
+            right: 12px;
+            bottom: 12px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .input-icon {
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.1rem;
+            padding: 4px;
+        }
+        
+        .input-icon:hover {
+            color: #0077ff;
+        }
+        
+        .image-preview {
+            position: absolute;
+            bottom: 60px;
+            left: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid #0077ff;
+            max-width: 150px;
+            max-height: 120px;
+            overflow: hidden;
+            z-index: 100;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 80px;
+            border-radius: 4px;
+        }
+        
+        .remove-image {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            z-index: 101;
+        }
+        
+        .send-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0077ff, #ff0080);
+            border: none;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 119, 255, 0.3);
+        }
+        
+        .send-btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        /* Thinking Indicator */
+        .thinking-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: rgba(0, 100, 200, 0.15);
+            border: 1px solid rgba(0, 150, 255, 0.3);
+            border-radius: 12px;
+            align-self: flex-start;
+            max-width: 180px;
+        }
+        
+        .thinking-dots {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .thinking-dots span {
+            width: 6px;
+            height: 6px;
+            background: #0077ff;
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out;
+        }
+        
+        .thinking-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .thinking-dots span:nth-child(2) { animation-delay: -0.16s; }
+        
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            color: #0077ff;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .empty-state h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, #0077ff, #ff0080);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .empty-state p {
+            color: #888;
+            line-height: 1.5;
+            max-width: 300px;
+            margin: 0 auto 25px;
+            font-size: 0.95rem;
+        }
+        
+        .example-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 300px;
+            width: 100%;
+        }
+        
+        .example-question {
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+        
+        .example-question:hover {
+            background: rgba(0, 119, 255, 0.1);
+            border-color: rgba(0, 119, 255, 0.3);
+            transform: translateX(3px);
+        }
+        
+        /* Performance Indicator */
+        .performance-indicator {
+            position: absolute;
+            bottom: 5px;
+            right: 10px;
+            font-size: 0.7rem;
+            color: rgba(0, 255, 255, 0.6);
+            background: rgba(0, 20, 40, 0.5);
+            padding: 3px 8px;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        
+        /* Mobile Controls */
+        .mobile-controls {
+            display: none;
+            padding: 10px 20px;
+            background: rgba(20, 20, 35, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+        
+        .quick-action {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            white-space: nowrap;
+            font-size: 0.85rem;
+            color: #ccc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .quick-action:hover {
+            background: rgba(0, 119, 255, 0.1);
+            border-color: rgba(0, 119, 255, 0.3);
+        }
+        
+        /* File Input Hidden */
+        #imageInput {
+            display: none;
+        }
+        
+        /* Responsive Design */
+        @media (min-width: 768px) {
+            .chat-container {
+                max-width: 800px;
+                margin: 0 auto;
+                border-radius: 20px;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                margin-top: 20px;
+                margin-bottom: 20px;
+                height: calc(100vh - 40px);
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            }
+            
+            .chat-header {
+                padding: 20px 30px;
+            }
+            
+            .messages-area {
+                padding: 30px;
+            }
+            
+            .input-area {
+                padding: 25px 30px;
+            }
+            
+            .message {
+                max-width: 80%;
+            }
+            
+            .uploaded-image {
+                max-width: 300px;
+                max-height: 200px;
+            }
+            
+            .empty-state {
+                padding: 60px 30px;
+            }
+            
+            .empty-state h2 {
+                font-size: 1.8rem;
+            }
+            
+            .empty-state p {
+                max-width: 400px;
+            }
+            
+            .example-questions {
+                max-width: 400px;
+            }
+        }
+        
+        /* Prevent text selection on mobile */
+        .message, .input-box textarea, .example-question, .quick-action {
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        /* Allow selection in message content only */
+        .message-content {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        
+        /* Hide scrollbars on mobile */
+        @media (max-width: 767px) {
+            .messages-area::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .quick-actions::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .mobile-controls {
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <div class="header-text">
+                    <h1>JM AI</h1>
+                    <div class="tagline">Advanced Intelligence</div>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Online</span>
+            </div>
+        </div>
+        
+        <!-- Messages Area -->
+        <div class="messages-area" id="messagesContainer">
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+                <i class="fas fa-comment-alt"></i>
+                <h2>Welcome to JM AI</h2>
+                <p>A smart and user-friendly artificial intelligence created by Muktadir Rahman Shafin to help people learn and solve problems easily.</p>
+                
+                <div class="example-questions">
+                    <div class="example-question" onclick="useExample('What is in this image?', 'image')">
+                        <i class="fas fa-image"></i> Analyze an uploaded image
+                    </div>
+                    <div class="example-question" onclick="useExample('Write a Python function to sort a list')">
+                        <i class="fas fa-code"></i> Write Python code
+                    </div>
+                    <div class="example-question" onclick="useExample('Explain quantum computing in simple terms')">
+                        <i class="fas fa-brain"></i> Explain complex topics
+                    </div>
+                    <div class="example-question" onclick="useExample('Translate "Hello, how are you?" to Spanish')">
+                        <i class="fas fa-language"></i> Translate languages
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Messages will appear here -->
+        </div>
+        
+        <!-- Mobile Quick Actions -->
+        <div class="mobile-controls">
+            <div class="quick-actions">
+                <div class="quick-action" onclick="useExample('What is in this image?', 'image')">
+                    <i class="fas fa-image"></i> Image
+                </div>
+                <div class="quick-action" onclick="useExample('Write Python code')">
+                    <i class="fas fa-code"></i> Code
+                </div>
+                <div class="quick-action" onclick="useExample('Explain something')">
+                    <i class="fas fa-brain"></i> Explain
+                </div>
+                <div class="quick-action" onclick="useExample('Translate text')">
+                    <i class="fas fa-language"></i> Translate
+                </div>
+                <div class="quick-action" onclick="document.getElementById('newChatBtn').click()">
+                    <i class="fas fa-plus"></i> New Chat
+                </div>
+            </div>
+        </div>
+        
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <div class="input-box">
+                    <textarea id="userInput" 
+                              placeholder="Ask JM AI anything..." 
+                              rows="1"
+                              autocomplete="off"
+                              autocorrect="off"
+                              autocapitalize="sentences"
+                              spellcheck="true"
+                              autofocus></textarea>
+                    <div class="input-icons">
+                        <i class="fas fa-image input-icon" id="imageBtn" title="Upload Image"></i>
+                    </div>
+                    <div id="imagePreview" class="image-preview" style="display: none;">
+                        <button class="remove-image" onclick="removeImage()">×</button>
+                        <img id="previewImage" src="" alt="Preview">
+                    </div>
+                </div>
+                <button class="send-btn" id="sendBtn">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Performance Indicator -->
+        <div class="performance-indicator" id="performance">Ready</div>
+    </div>
+
+    <!-- Hidden elements -->
+    <input type="file" id="imageInput" accept="image/*" capture="environment">
+    <button id="newChatBtn" style="display: none;"></button>
+
+    <script>
+        // Configuration - Your API details
+        const OPENROUTER_API_KEY = "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";
+        const MODEL = "openai/chatgpt-4o-latest";
+        const SITE_URL = "https://jm-ai.com";
+        const SITE_NAME = "JM AI";
+        
+        // Global variables
+        let conversationHistory = [];
+        let isProcessing = false;
+        let currentImage = null;
+        let currentImageBase64 = null;
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const userInput = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const messagesContainer = document.getElementById('messagesContainer');
+            const emptyState = document.getElementById('emptyState');
+            const performanceIndicator = document.getElementById('performance');
+            const imageBtn = document.getElementById('imageBtn');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImage');
+            const newChatBtn = document.getElementById('newChatBtn');
+            
+            // Initialize system message
+            conversationHistory.push({
+                role: "system",
+                content: "You are JM AI, an advanced multimodal AI assistant created by Muktadir Rahman Shafin. You excel at image analysis, code generation, language translation, math solving, creative writing, data analysis, and educational explanations. Be helpful, accurate, and user-friendly. Always provide clear, detailed responses tailored to the user's needs."
+            });
+            
+            // Auto-resize textarea for mobile
+            userInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+                // Scroll to bottom on mobile
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 100);
+            });
+            
+            // Add message to chat with copy button
+            function addMessage(text, isUser = false, isError = false, imageUrl = null) {
+                // Hide empty state
+                if (emptyState.style.display !== 'none') {
+                    emptyState.style.display = 'none';
+                }
+                
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+                
+                const time = new Date();
+                const timeString = time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                
+                const sender = isUser ? 'You' : 'JM AI';
+                const avatarClass = isUser ? 'user-avatar' : 'bot-avatar';
+                const avatarIcon = isUser ? 'fas fa-user' : 'fas fa-robot';
+                
+                // Format text with markdown
+                let formattedText = text
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/`(.*?)`/g, '<code>$1</code>')
+                    .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+                
+                let messageHTML = `
+                    <div class="message-header">
+                        <div class="message-avatar ${avatarClass}">
+                            <i class="${avatarIcon}"></i>
+                        </div>
+                        <div class="message-sender">${sender}</div>
+                        <button class="copy-btn" onclick="copyMessage(this, '${escapeText(text)}')" title="Copy message">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <div class="message-time">${timeString}</div>
+                    </div>
+                `;
+                
+                // Add image if present
+                if (imageUrl && isUser) {
+                    messageHTML += `<img src="${imageUrl}" class="uploaded-image" alt="Uploaded image" onclick="showImageModal('${imageUrl}')"><br>`;
+                }
+                
+                messageHTML += `<div class="message-content">${formattedText}</div>`;
+                
+                messageDiv.innerHTML = messageHTML;
+                messagesContainer.appendChild(messageDiv);
+                
+                // Smooth scroll to bottom
+                setTimeout(() => {
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, 50);
+            }
+            
+            // Show thinking indicator
+            function showThinking() {
+                const thinkingDiv = document.createElement('div');
+                thinkingDiv.className = 'thinking-indicator';
+                thinkingDiv.id = 'thinkingIndicator';
+                thinkingDiv.innerHTML = `
+                    <div class="message-avatar bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div style="font-weight: 500;">Thinking...</div>
+                    <div class="thinking-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                `;
+                messagesContainer.appendChild(thinkingDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            // Hide thinking indicator
+            function hideThinking() {
+                const thinking = document.getElementById('thinkingIndicator');
+                if (thinking) thinking.remove();
+            }
+            
+            // Convert image to base64
+            function imageToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => resolve(e.target.result);
+                    reader.onerror = (e) => reject(e);
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            // API call function with image support (EXACTLY as in your TypeScript)
+            async function callAPI(userMessage, imageBase64 = null) {
+                const startTime = Date.now();
+                
+                try {
+                    // Prepare message content array EXACTLY as in your TypeScript example
+                    let messageContent = [];
+                    
+                    // Add text part
+                    messageContent.push({
+                        type: "text",
+                        text: userMessage
+                    });
+                    
+                    // Add image part if exists
+                    if (imageBase64) {
+                        messageContent.push({
+                            type: "image_url",
+                            image_url: {
+                                url: imageBase64
+                            }
+                        });
+                    }
+                    
+                    // Add user message to history
+                    conversationHistory.push({
+                        role: "user",
+                        content: messageContent
+                    });
+                    
+                    // Prepare request EXACTLY as in your TypeScript example
+                    const requestBody = {
+                        model: MODEL,
+                        messages: conversationHistory,
+                        max_tokens: 1500,
+                        temperature: 0.7
+                    };
+                    
+                    performanceIndicator.textContent = "Processing...";
+                    
+                    // Make API call with EXACT headers as in your example
+                    const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                            "HTTP-Referer": SITE_URL,
+                            "X-Title": SITE_NAME,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(requestBody)
+                    });
+                    
+                    const responseTime = Date.now() - startTime;
+                    performanceIndicator.textContent = `${responseTime}ms`;
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("API Error:", errorText);
+                        throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (data.choices && data.choices.length > 0) {
+                        const aiResponse = data.choices[0].message.content;
+                        
+                        // Add to conversation history (simplify for storage)
+                        conversationHistory.push({
+                            role: "assistant",
+                            content: aiResponse
+                        });
+                        
+                        // Keep history manageable
+                        if (conversationHistory.length > 15) {
+                            conversationHistory = [
+                                conversationHistory[0],
+                                ...conversationHistory.slice(-14)
+                            ];
+                        }
+                        
+                        return aiResponse;
+                    } else {
+                        throw new Error("No response from AI");
+                    }
+                } catch (error) {
+                    console.error("API Error:", error);
+                    performanceIndicator.textContent = "Error";
+                    throw error;
+                }
+            }
+            
+            // Handle sending message
+            async function handleSend() {
+                const message = userInput.value.trim();
+                if ((message === '' && !currentImageBase64) || isProcessing) return;
+                
+                // Show image in chat
+                if (currentImage) {
+                    addMessage(message || "What is in this image?", true, false, currentImage);
+                } else {
+                    addMessage(message, true);
+                }
+                
+                userInput.value = '';
+                userInput.style.height = '50px';
+                
+                // Clear image preview
+                removeImage();
+                
+                // Disable input during processing
+                isProcessing = true;
+                userInput.disabled = true;
+                sendBtn.disabled = true;
+                
+                // Show thinking indicator
+                showThinking();
+                
+                try {
+                    // Get AI response
+                    const aiResponse = await callAPI(message || "What is in this image?", currentImageBase64);
+                    
+                    // Hide thinking and show response
+                    hideThinking();
+                    addMessage(aiResponse, false);
+                    
+                } catch (error) {
+                    // Hide thinking indicator
+                    hideThinking();
+                    
+                    // Show error
+                    let errorMsg = "Error processing request. Please try again.";
+                    if (error.message.includes("429")) errorMsg = "Rate limit reached. Please wait.";
+                    if (error.message.includes("401")) errorMsg = "API authentication failed.";
+                    if (error.message.includes("image")) errorMsg = "Image processing error. Try a different image.";
+                    
+                    addMessage(errorMsg, false, true);
+                } finally {
+                    // Re-enable input and clear image
+                    isProcessing = false;
+                    userInput.disabled = false;
+                    sendBtn.disabled = false;
+                    currentImage = null;
+                    currentImageBase64 = null;
+                    userInput.focus();
+                    
+                    // Reset performance indicator after 3 seconds
+                    setTimeout(() => {
+                        performanceIndicator.textContent = "Ready";
+                    }, 3000);
+                }
+            }
+            
+            // Handle image upload
+            function handleImageUpload(file) {
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                
+                // Check file size (max 10MB for mobile)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Image size should be less than 10MB');
+                    return;
+                }
+                
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentImage = e.target.result;
+                    previewImage.src = currentImage;
+                    imagePreview.style.display = 'block';
+                    
+                    // Convert to base64 for API
+                    imageToBase64(file).then(base64 => {
+                        currentImageBase64 = base64;
+                    }).catch(error => {
+                        console.error("Image conversion error:", error);
+                        alert('Error processing image');
+                    });
+                };
+                reader.readAsDataURL(file);
+            }
+            
+            // Remove image
+            window.removeImage = function() {
+                currentImage = null;
+                currentImageBase64 = null;
+                imagePreview.style.display = 'none';
+                previewImage.src = '';
+            };
+            
+            // Escape text for HTML attributes
+            function escapeText(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML
+                    .replace(/'/g, "\\'")
+                    .replace(/"/g, '&quot;')
+                    .replace(/\n/g, '\\n');
+            }
+            
+            // Copy message to clipboard
+            window.copyMessage = function(button, text) {
+                // Decode HTML entities and unescape
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = text
+                    .replace(/\\'/g, "'")
+                    .replace(/\\n/g, '\n')
+                    .replace(/&quot;/g, '"');
+                const decodedText = tempDiv.textContent;
+                
+                navigator.clipboard.writeText(decodedText).then(() => {
+                    // Show copied state
+                    const originalHTML = button.innerHTML;
+                    button.classList.add('copied');
+                    button.innerHTML = '<i class="fas fa-check"></i>';
+                    button.title = 'Copied!';
+                    
+                    // Reset after 2 seconds
+                    setTimeout(() => {
+                        button.classList.remove('copied');
+                        button.innerHTML = originalHTML;
+                        button.title = 'Copy message';
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy message to clipboard');
+                });
+            };
+            
+            // Show image in modal
+            window.showImageModal = function(url) {
+                // Create modal
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.9);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                    padding: 20px;
+                `;
+                
+                modal.innerHTML = `
+                    <div style="position: relative; max-width: 100%; max-height: 100%;">
+                        <button onclick="this.parentElement.parentElement.remove()" 
+                                style="position: absolute; top: -40px; right: 0; background: #0077ff; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;">
+                            ×
+                        </button>
+                        <img src="${url}" style="max-width: 100%; max-height: 90vh; border-radius: 10px;">
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                
+                // Close on click outside image
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            };
+            
+            // Example question function
+            window.useExample = function(text, type = null) {
+                if (type === 'image') {
+                    imageInput.click();
+                    userInput.value = text;
+                    userInput.style.height = 'auto';
+                    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+                } else {
+                    userInput.value = text;
+                    userInput.style.height = 'auto';
+                    userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
+                    userInput.focus();
+                }
+            };
+            
+            // New chat function
+            newChatBtn.addEventListener('click', function() {
+                if (confirm("Start new conversation?")) {
+                    conversationHistory = [conversationHistory[0]];
+                    messagesContainer.innerHTML = '';
+                    emptyState.style.display = 'flex';
+                    performanceIndicator.textContent = "Ready";
+                    removeImage();
+                }
+            });
+            
+            // Event Listeners
+            sendBtn.addEventListener('click', handleSend);
+            
+            userInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            });
+            
+            // Image upload button
+            imageBtn.addEventListener('click', function() {
+                imageInput.click();
+            });
+            
+            // Handle image selection
+            imageInput.addEventListener('change', function(e) {
+                if (e.target.files && e.target.files[0]) {
+                    handleImageUpload(e.target.files[0]);
+                }
+            });
+            
+            // Settings functionality
+            const settingsBtn = document.createElement('button');
+            settingsBtn.style.display = 'none';
+            settingsBtn.id = 'settingsBtn';
+            document.body.appendChild(settingsBtn);
+            
+            settingsBtn.addEventListener('click', function() {
+                alert("JM AI is a smart and user-friendly artificial intelligence created by Muktadir Rahman Shafin to help people learn and solve problems easily.\n\nPowered by GPT-4o with vision capabilities.\n\nFeatures:\n• Image analysis and description\n• Code generation and debugging\n• Language translation\n• Math problem solving\n• Creative writing\n• Data analysis\n• Educational explanations");
+            });
+            
+            // Allow dropping images
+            document.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            document.addEventListener('drop', function(e) {
+                e.preventDefault();
+                if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                    handleImageUpload(e.dataTransfer.files[0]);
+                }
+            });
+            
+            // Auto-focus input on load
+            userInput.focus();
+            
+            // Handle Android back button
+            window.addEventListener('popstate', function(e) {
+                // Prevent accidental navigation
+                e.preventDefault();
+            });
+            
+            // Rotate placeholder text
+            const placeholders = [
+                "Ask JM AI anything...",
+                "Upload an image to analyze...",
+                "Need code help?",
+                "Want translation?",
+                "Need math solving?",
+                "Ask for creative writing..."
+            ];
+            
+            let placeholderIndex = 0;
+            setInterval(() => {
+                userInput.placeholder = placeholders[placeholderIndex];
+                placeholderIndex = (placeholderIndex + 1) % placeholders.length;
+            }, 3000);
+            
+            // Pre-warm API connection
+            setTimeout(async () => {
+                try {
+                    await fetch("https://openrouter.ai/api/v1/models", {
+                        headers: { "Authorization": `Bearer ${OPENROUTER_API_KEY}` }
+                    });
+                    console.log("JM AI ready with all services");
+                } catch (e) {
+                    console.log("API check skipped");
+                }
+            }, 1000);
+            
+            // Prevent zoom on mobile
+            document.addEventListener('touchstart', function(e) {
+                if (e.touches.length > 1) {
+                    e.preventDefault();
+                }
+            }, { passive: false });
+            
+            let lastTouchEnd = 0;
+            document.addEventListener('touchend', function(e) {
+                const now = (new Date()).getTime();
+                if (now - lastTouchEnd <= 300) {
+                    e.preventDefault();
+                }
+                lastTouchEnd = now;
+            }, false);
+        });
+    </script>
+</body>
+</html>
